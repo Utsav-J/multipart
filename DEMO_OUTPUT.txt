@@ -1,0 +1,177 @@
+================================================================================
+           QA AGENT WITH MULTI-PART RESPONSES - LIVE DEMO OUTPUT
+================================================================================
+
+QUESTION SENT:
+--------------
+"What is quantum computing?"
+
+RESPONSE RECEIVED:
+------------------
+Task ID: f7f34d70-f55...
+Status: completed
+Artifacts: 1
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ ARTIFACT #1: Contains 2 parts                                              │
+└────────────────────────────────────────────────────────────────────────────┘
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ PART 1: TEXT (Human-Readable Answer)                                      ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Based on your question "What is quantum computing?", here's a comprehensive 
+answer:
+
+This is a test response generated without an actual LLM. In a real deployment 
+with a GOOGLE_API_KEY, the agent would:
+
+1. **Analyze your question** using advanced natural language understanding
+2. **Generate a detailed answer** drawing from its trained knowledge base
+3. **Create relevant follow-up questions** to continue the conversation
+4. **Assess confidence** based on the certainty of the information
+5. **Identify key topics** covered in the response
+
+The multi-part response pattern demonstrated here works the same way whether 
+using test data or a real LLM. The key is that we're sending:
+- **Part 1 (TextPart)**: This answer text
+- **Part 2 (DataPart)**: Structured follow-up questions and metadata
+
+This architecture allows clients to display the answer naturally while using 
+the structured data for interactive UI elements like clickable follow-up buttons.
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ PART 2: DATA (Structured Follow-ups & Metadata)                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+[FOLLOW-UP QUESTIONS]
+  1. How do quantum computers differ from classical computers?
+  2. What are the main applications of quantum computing?
+  3. What challenges remain in building practical quantum computers?
+  4. How does quantum entanglement contribute to computing power?
+
+[CONFIDENCE] 85.0%
+
+[TOPICS] quantum mechanics, quantum computing
+
+[RAW JSON]
+{
+    "follow_up_questions": [
+        "How do quantum computers differ from classical computers?",
+        "What are the main applications of quantum computing?",
+        "What challenges remain in building practical quantum computers?",
+        "How does quantum entanglement contribute to computing power?"
+    ],
+    "confidence": 0.85,
+    "topics": [
+        "quantum mechanics",
+        "quantum computing"
+    ]
+}
+
+================================================================================
+                        KEY IMPLEMENTATION CODE
+================================================================================
+
+File: agent_executor.py (Lines 75-92)
+
+```python
+# ===== KEY PATTERN: Multi-Part Response =====
+# Extract the answer text and follow-up data
+answer_text = item.get('answer_text', '')
+follow_up_data = item.get('follow_up_data', {})
+
+# Create the multi-part response
+parts = [
+    # Part 1: Text answer for human consumption
+    Part(root=TextPart(text=answer_text)),
+    
+    # Part 2: Structured data for follow-ups and metadata
+    Part(root=DataPart(data=follow_up_data)),
+]
+
+# Send the multi-part artifact
+await updater.add_artifact(parts, name='qa_response')
+await updater.complete()
+```
+
+================================================================================
+                           HOW IT WORKS
+================================================================================
+
+1. USER SENDS: "What is quantum computing?"
+
+2. AGENT PROCESSES:
+   - System prompt instructs LLM to generate answer + follow-ups
+   - LangGraph returns structured response (Pydantic model)
+   - Agent extracts: answer_text and follow_up_data
+
+3. EXECUTOR CREATES MULTI-PART:
+   - Part 1 (TextPart): answer_text → Human readable
+   - Part 2 (DataPart): follow_up_data → Machine readable
+
+4. CLIENT RECEIVES:
+   - Single artifact with 2 parts
+   - Can display text naturally
+   - Can use data for interactive UI
+
+================================================================================
+                          CLIENT USAGE EXAMPLE
+================================================================================
+
+For each part in artifact.parts:
+  
+  IF part.kind == 'text':
+    → Display as main answer in UI
+    → Render as markdown/HTML
+    → Show to user naturally
+  
+  ELIF part.kind == 'data':
+    → Parse JSON structure
+    → Render follow-ups as clickable buttons
+    → Show confidence meter
+    → Display topic tags
+    → Use for analytics/processing
+
+================================================================================
+                              BENEFITS
+================================================================================
+
+✅ Clean Separation: Text for humans, data for machines
+✅ Rich UX: Enable interactive elements (buttons, tags, metrics)
+✅ No Parsing: Structured data readily available
+✅ Flexible: Add more data fields as needed
+✅ Standard: Follows A2A protocol specification
+✅ Extensible: Can add more parts (files, images, etc.)
+
+================================================================================
+                         FILES CREATED
+================================================================================
+
+✓ agent.py                  - System prompt & LangGraph agent
+✓ agent_executor.py         - Multi-part response implementation ⭐
+✓ agent_test_mode.py        - Test mode (no API key needed)
+✓ __main__.py               - Production server
+✓ __main_test__.py          - Test server
+✓ run_demo.py               - Demo script (executed above)
+✓ QUICK_REFERENCE.md        - Quick reference guide
+✓ SYSTEM_PROMPT_GUIDE.md    - System prompt design guide
+✓ EXAMPLE_RESPONSE.md       - Response structure examples
+✓ README.md                 - Complete documentation
+
+================================================================================
+                         SERVER STATUS
+================================================================================
+
+Address: http://localhost:9998
+Status: ✓ Running (Test Mode)
+Protocol: A2A / JSON-RPC 2.0
+Pattern: Multi-part response (TextPart + DataPart)
+
+To run with real LLM:
+  export GOOGLE_API_KEY="your-key"
+  python __main__.py
+
+================================================================================
+                         END OF DEMO
+================================================================================
